@@ -1,0 +1,7 @@
+fastmcp
+python-pptx
+openai
+fastapi
+streamlit
+uvicorn
+requests

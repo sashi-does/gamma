@@ -1,0 +1,19 @@
+# Python cache
+__pycache__/
+*.pyc
+
+# Virtual environment
+venv/
+env/
+
+# Environment variables (IMPORTANT)
+.env
+
+# Generated files
+*.pptx
+
+# OS files
+.DS_Store
+
+# Logs
+*.log
