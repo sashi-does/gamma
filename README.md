@@ -2,6 +2,8 @@
 
 SlideMind is a modern, full-stack AI-powered presentation generator. It allows you to rapidly generate completely structured slide decks by simply providing a text prompt. Start with a topic, generate full slides with AI, preview them as cards, edit if needed, and download instantly as a beautiful native PowerPoint (`.pptx`) file.
 
+---
+
 ## Demo Video
 
 Watch SlideMind in action:
@@ -22,6 +24,8 @@ The project splits the workload cleanly between a stunning, lightning-fast **Str
 - **MCP (Model Context Protocol)**: Modular tool architecture via FastMCP that restricts LLM permissions to only defined tools.
 - **Python-PPTX**: Used inside the MCP server to programmatically create slides, text boxes, bullet lists, and apply the 'Midnight Executive' dark theme.
 - **OpenRouter**: Powers the intelligent planning and content generation phase using gpt-4o-mini.
+
+---
 
 ## System Architecture
 
@@ -88,6 +92,8 @@ ascii
 | FS MCP Server        | FastMCP                     | Provides safe filesystem read/list access for verification |
 
 
+---
+
 ## Agent Pipeline
 
 The AI agent follows a strict 3-phase process:
@@ -95,6 +101,8 @@ The AI agent follows a strict 3-phase process:
 1. **Phase 1 – PLAN**: Sends the user prompt to OpenRouter (gpt-4o-mini) and receives a structured JSON slide plan containing presentation title and list of slides with bullet points.
 2. **Phase 2 – EXEC**: Initializes the presentation and calls the PPT MCP server to add each slide. If a slide has fewer than 3 bullet points, an additional LLM call expands the content.
 3. **Phase 3 – SAVE**: Calls the save tool to write the final `output.pptx` file to disk.
+
+---
 
 ## Local Development & Setup
 
