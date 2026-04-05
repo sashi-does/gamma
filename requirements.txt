@@ -5,3 +5,4 @@ fastapi
 streamlit
 uvicorn
 requests
+fpdf2

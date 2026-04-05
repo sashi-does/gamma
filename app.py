@@ -368,7 +368,8 @@ div[data-testid="stButton"]>button[kind="primary"]{{
 }}
 div[data-testid="stButton"]>button[kind="primary"]:hover{{opacity:0.87!important;}}
 
-div[data-testid="stDownloadButton"]>button{{
+div[data-testid="stDownloadButton"]>button,
+div[data-testid="stPopover"]>button{{
   border-radius:8px!important;font-family:var(--fb)!important;font-weight:500!important;
   background:var(--bg2)!important;color:var(--tx)!important;border:1px solid var(--bd)!important;width:100%!important;
 }}
@@ -503,6 +504,19 @@ div[data-testid="stButton"] > button[kind="secondary"]:hover{{
 .prog-head{{font-family:var(--fm);font-size:0.59rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--mu);margin-bottom:0.9rem;}}
 .prog-step{{display:flex;align-items:center;gap:0.65rem;padding:0.38rem 0;font-size:0.84rem;font-family:var(--fb);color:var(--mu);transition:color 0.25s;}}
 .prog-step.active{{color:var(--tx);}}
+.prog-step.active span {{
+  background: linear-gradient(90deg, var(--tx) 35%, var(--ac) 50%, var(--tx) 65%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+  animation: txtShine 1.8s linear infinite;
+}}
+@keyframes txtShine {{
+  0% {{ background-position: 200% center; }}
+  100% {{ background-position: -200% center; }}
+}}
 .prog-step.done{{color:var(--ok);}}
 .stic{{width:24px;height:24px;border-radius:7px;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all 0.25s;}}
 .stic svg{{width:13px;height:13px;}}
@@ -747,8 +761,7 @@ def chip_row(topics: list, prefix: str):
             short = short[:28] + ("…" if len(short) > 28 else "")
             if st.button(short, key=f"{prefix}_{i}", use_container_width=True):
                 st.session_state.prompt_value = topic
-                if "main_input" in st.session_state:
-                    del st.session_state["main_input"]
+                st.session_state.main_input = topic
                 st.rerun()
 
 
@@ -1072,7 +1085,7 @@ if st.session_state.active_tab == "chat":
         st.markdown("<div style='height:0.15rem'></div>", unsafe_allow_html=True)
 
     # ── Settings row above input ───────────────────────────────────────────────
-    scol1, scol2, _ = st.columns([2, 2, 4])
+    scol1, _ = st.columns([2, 6])
     with scol1:
         st.markdown('<div class="settings-label">Slide Count</div>', unsafe_allow_html=True)
         num_slides = st.slider(
@@ -1082,14 +1095,6 @@ if st.session_state.active_tab == "chat":
             key="slide_count_main",
         )
         st.session_state.num_slides = num_slides
-
-    with scol2:
-        st.markdown('<div class="settings-label" style="margin-top:0.05rem;">Export Format</div>', unsafe_allow_html=True)
-        st.selectbox(
-            "", ["PowerPoint (.pptx)", "PDF"],
-            label_visibility="collapsed",
-            key="exp_fmt_main",
-        )
 
     st.markdown("<div style='height:0.2rem'></div>", unsafe_allow_html=True)
 
@@ -1198,14 +1203,21 @@ elif st.session_state.active_tab == "editor":
                 tmp.close()
                 subprocess.Popen(["open", tmp.name])
         with col_dl:
-            is_pdf = (st.session_state.get("exp_fmt_main") == "PDF")
-            st.download_button(
-                "Download",
-                data=generate_pdf(st.session_state.plan) if is_pdf else st.session_state.pptx_bytes,
-                file_name="presentation.pdf" if is_pdf else "presentation.pptx",
-                mime="application/pdf" if is_pdf else "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-                use_container_width=True,
-            )
+            with st.popover("Download", use_container_width=True):
+                st.download_button(
+                    "📥 PowerPoint (.pptx)",
+                    data=st.session_state.pptx_bytes,
+                    file_name="presentation.pptx",
+                    mime="application/vnd.openxmlformats-officedocument.presentationml.presentation",
+                    use_container_width=True,
+                )
+                st.download_button(
+                    "📥 PDF Document (.pdf)",
+                    data=generate_pdf(st.session_state.plan),
+                    file_name="presentation.pdf",
+                    mime="application/pdf",
+                    use_container_width=True,
+                )
 
         st.markdown('<div class="div"></div>', unsafe_allow_html=True)
         edited_slides = render_edit_form(slides)
@@ -1271,14 +1283,21 @@ elif st.session_state.active_tab == "preview":
                 tmp.close()
                 subprocess.Popen(["open", tmp.name])
         with dc:
-            is_pdf = (st.session_state.get("exp_fmt_main") == "PDF")
-            st.download_button(
-                "Download",
-                data=generate_pdf(st.session_state.plan) if is_pdf else st.session_state.pptx_bytes,
-                file_name="presentation.pdf" if is_pdf else "presentation.pptx",
-                mime="application/pdf" if is_pdf else "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-                use_container_width=True,
-            )
+            with st.popover("Download", use_container_width=True):
+                st.download_button(
+                    "📥 PowerPoint (.pptx)",
+                    data=st.session_state.pptx_bytes,
+                    file_name="presentation.pptx",
+                    mime="application/vnd.openxmlformats-officedocument.presentationml.presentation",
+                    use_container_width=True,
+                )
+                st.download_button(
+                    "📥 PDF Document (.pdf)",
+                    data=generate_pdf(st.session_state.plan),
+                    file_name="presentation.pdf",
+                    mime="application/pdf",
+                    use_container_width=True,
+                )
 
         st.markdown('<div class="div"></div>', unsafe_allow_html=True)
 
