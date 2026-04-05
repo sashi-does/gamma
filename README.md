@@ -34,13 +34,18 @@ The project splits the workload cleanly between a stunning, lightning-fast **Str
 | PPT MCP Server       | FastMCP + python-pptx       | Creates and assembles PowerPoint slides with enforced Midnight Executive theme |
 | FS MCP Server        | FastMCP                     | Provides safe filesystem read/list access for verification |
 
+```ascii
 ┌─────────────────────────────────────────────────────┐
 │                Streamlit Frontend                   │
 │                   (port 8501)                       │
 │                                                     │
-│  Chat Interface → Generate Button → Editor Tab      │
-│  Live Slide Preview Cards → Theme Toggle            │
-│  PDF Export (fpdf2) → Download PPTX Button          │
+│  • Chat Interface                                   │
+│  • Generate Button                                  │
+│  • Live Slide Preview Cards                         │
+│  • Interactive Editor Tab                           │
+│  • Theme Toggle (Dark/Light)                        │
+│  • PDF Export (fpdf2)                               │
+│  • Download PPTX Button                             │
 └──────────────────────┬──────────────────────────────┘
                        │ HTTP (httpx)
                        │ POST /generate
@@ -52,12 +57,12 @@ The project splits the workload cleanly between a stunning, lightning-fast **Str
 │               FastAPI Backend                       │
 │                 server.py (port 8000)               │
 │                                                     │
-│  • /generate     → Runs full 3-phase agent pipeline │
-│  • /update       → Re-renders PPTX from edited plan │
-│  • /download     → Streams output.pptx              │
-│  • /health       → API status check                 │
+│  • /generate     → Full 3-phase agent pipeline      │
+│  • /update       → Re-render PPTX from edited plan  │
+│  • /download     → Stream output.pptx               │
+│  • /health       → API liveness probe               │
 │                                                     │
-│  Manages MCP ClientSessions (asynccontextmanager)   │
+│  Manages MCP ClientSessions via asynccontextmanager │
 └──────────────────────┬──────────────────────────────┘
                        │ stdio (MCP Protocol)
                        ▼
@@ -69,18 +74,18 @@ The project splits the workload cleanly between a stunning, lightning-fast **Str
 │  • add_slide         │  • list_dir                  │
 │  • save_presentation │                              │
 │                      │                              │
-│  Uses python-pptx to │  Safe filesystem access      │
-│  build Midnight      │  for verification            │
-│  Executive theme     │                              │
+│  Uses python-pptx    │  Safe filesystem access      │
+│  Midnight Executive  │  for post-save verification  │
+│  dark theme          │                              │
 └──────────────────────┴──────────────────────────────┘
 
                   ▲
-                  │
-        LLM Calls via OpenRouter (gpt-4o-mini)
+                  │ LLM Calls via OpenRouter (gpt-4o-mini)
                   │
              agent_ppt.py
        (3-Phase Pipeline: PLAN → EXEC → SAVE)
 
+```
 ## Agent Pipeline
 
 The AI agent follows a strict 3-phase process:
