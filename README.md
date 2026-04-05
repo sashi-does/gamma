@@ -1,103 +1,104 @@
 # SlideMind – AI Presentation Builder ◈
 
-SlideMind is a modern, full-stack AI-powered presentation generator. It allows you to rapidly generate completely structured slide decks by simply talking to it like a chatbot. Start with a prompt, generate full slides with AI, directly preview the cards, and download them instantly as beautiful native PowerPoint (`.pptx`).
+SlideMind is a modern, full-stack AI-powered presentation generator. It allows you to rapidly generate completely structured slide decks by simply providing a text prompt. Start with a topic, generate full slides with AI, preview them as cards, edit if needed, and download instantly as a beautiful native PowerPoint (`.pptx`) file.
 
----
-
-## 🎥 Demo Video
+## Demo Video
 
 Watch SlideMind in action:
 
 [![Watch Demo](https://img.youtube.com/vi/QqBGYNpWWhI/0.jpg)](https://youtu.be/QqBGYNpWWhI)
 
----
-
-The project splits the workload cleanly between a stunning, lightning-fast **Streamlit** frontend and a robust **FastAPI / MCP** (Model Context Protocol) backend capable of assembling raw PowerPoint files procedurally.
-
----
+The project splits the workload cleanly between a stunning, lightning-fast **Streamlit** frontend and a robust **FastAPI + MCP** (Model Context Protocol) backend capable of assembling raw PowerPoint files procedurally.
 
 ## Technical Stack
 
 ### Frontend
-- **Streamlit**: Powers the entire real-time conversational UI and slide editor grid.
-- **Custom CSS / JS**: Implements a highly polished vibrantly dark glassmorphic design theme, custom tooltips, slide carousels, and responsive sidebars.
-- **FPDF2**: A pure-Python implementation integrated into the frontend to generate replica PDF exports on-the-fly directly from the AI's generated structural plan.
+- **Streamlit**: Powers the entire real-time conversational UI, slide preview grid, and editor.
+- **Custom CSS / JS**: Implements a polished dark glassmorphic design with custom fonts, tooltips, and responsive layout.
+- **FPDF2**: Used directly in the frontend to generate replica PDF exports on-the-fly from the slide plan.
 
 ### Backend
-- **FastAPI**: Provides the REST API layer handling jobs (`/generate`, `/update`, `/download`).
-- **MCP (Model Context Protocol)**: Uses a modular tool architecture via FastMCP (`agent_ppt.py` and `servers/ppt_mcp_server.py`) limiting direct LLM permissions.
-- **Python-PPTX**: The heavy lifter script within the tool server used to programmatically render PowerPoint shapes, text grids, and themed colors (The slide builder enforces a strict 'Midnight Executive' theme standard).
-- **OpenRouter API**: Intelligent model backing the prompt expansion, planning, and structured content routing phase.
+- **FastAPI**: Provides the REST API layer with endpoints for generation, updates, and downloads.
+- **MCP (Model Context Protocol)**: Modular tool architecture via FastMCP that restricts LLM permissions to only defined tools.
+- **Python-PPTX**: Used inside the MCP server to programmatically create slides, text boxes, bullet lists, and apply the 'Midnight Executive' dark theme.
+- **OpenRouter**: Powers the intelligent planning and content generation phase using gpt-4o-mini.
 
----
+## System Architecture
+
+| Layer                | Technology                  | Responsibilities |
+|----------------------|-----------------------------|------------------|
+| Frontend (UI)        | Streamlit                   | Chat interface, session state management, live slide preview cards, interactive editor, theme toggle, PDF export |
+| API Gateway          | FastAPI                     | REST endpoints (/generate, /update, /download, /health), request validation, CORS, MCP session management, file streaming |
+| AI Agent Core        | agent_ppt.py                | 3-phase pipeline: Plan (LLM), Execute (MCP tools), Save |
+| LLM Provider         | OpenRouter                  | Routes calls to gpt-4o-mini for slide structure planning and bullet point generation |
+| PPT MCP Server       | FastMCP + python-pptx       | Creates and assembles PowerPoint slides with enforced Midnight Executive theme |
+| FS MCP Server        | FastMCP                     | Provides safe filesystem read/list access for verification |
+
+## Agent Pipeline
+
+The AI agent follows a strict 3-phase process:
+
+1. **Phase 1 – PLAN**: Sends the user prompt to OpenRouter (gpt-4o-mini) and receives a structured JSON slide plan containing presentation title and list of slides with bullet points.
+2. **Phase 2 – EXEC**: Initializes the presentation and calls the PPT MCP server to add each slide. If a slide has fewer than 3 bullet points, an additional LLM call expands the content.
+3. **Phase 3 – SAVE**: Calls the save tool to write the final `output.pptx` file to disk.
 
 ## Local Development & Setup
 
-Both the backend generation server and the frontend UI daemon need to be running simultaneously to use the application.
+Both the backend and frontend must run simultaneously.
 
 ### 1. Requirements & Environment
-
-Initialize your local Python environment and install the required dependencies:
-
 ```bash
-# Create and activate your virtual environment (venv is already configured in this directory)
+# Activate virtual environment (if not already active)
 source venv/bin/activate
 
-# Install all primary dependencies
+# Install dependencies
 pip install -r requirements.txt
 ```
 
----
-
 ### 2. Environment Variables
-
-You must have a valid API key exposed to the background runtime so the agent can communicate with the LLM API.
-
-Ensure your `.env` file exists in the directory containing:
-
+Create a `.env` file in the project root with:
 ```bash
 OPENROUTER_API_KEY="sk-or-v1-..."
 ```
 
----
-
-### 3. Run the Backend API 
-
-This spins up the FastAPI layer on localized port 8000. It manages the long-running generation tasks, rendering pipelines, and the internal MCP server sub-processes.
-
+### 3. Run the Backend API
 ```bash
 uvicorn server:app --reload
 ```
+This starts the FastAPI server on http://127.0.0.1:8000
 
-*Note: The application requires the backend to be online to unlock the primary interface.*
-
----
-
-### 4. Run the Frontend 
-
-Open a new terminal tab, ensure your virtual environment is active, and launch the Streamlit dashboard:
-
+### 4. Run the Frontend
+Open a new terminal and run:
 ```bash
 streamlit run app.py
 ```
+The application will open automatically in your browser.
 
-This will automatically bridge with your browser and connect to the local backend.
-
----
+**Note**: The sidebar will show a green status indicator when the backend is connected.
 
 ## Key Features
+- Conversational Builder – Describe your topic and get a complete slide deck
+- Configurable number of slides (3 to 10)
+- Live slide preview cards rendered directly in the UI
+- Interactive Editor tab to modify titles and bullet points
+- One-click download of native `.pptx` file with Midnight Executive theme
+- Instant PDF export generated in the frontend
+- Clean dark glassmorphic UI with theme toggle
+- Secure sandboxed architecture using MCP tools
 
-- **Conversational Builder**: Chat interface routing naturally to presentation parameters.
-- **Live Markdown Preview**: Native visually rendered card arrays corresponding to structural slides built inside Streamlit.
-- **Editor Mode**: Interactive form expansion modifying text blocks/bullets dynamically across all slides.
-- **Multi-Format Export**: Quick download bridging direct `.pptx` assembly or procedural `.pdf` drafting.
-- **Vibrant Styling**: Custom native UI theming (No default generic component bounds).
+## Repository Structure (Key Files)
 
----
+- `app.py` – Streamlit frontend application
+- `server.py` – FastAPI backend server
+- `agent_ppt.py` – Core AI agent logic
+- `servers/ppt_mcp_server.py` – PowerPoint tool server
+- `servers/filesystem_mcp_server.py` – Filesystem tool server
+- `requirements.txt` – Project dependencies
 
-##  Future Improvements (Optional Ideas)
-
+## Future Improvements
 - Theme customization engine
-- Slide templates marketplace
-- Real-time collaboration
+- Pre-built slide template marketplace
+- Real-time collaboration support
 - Voice-to-presentation input
+- Automatic image generation per slide
+- Direct export to Google Slides & compatible to canva
