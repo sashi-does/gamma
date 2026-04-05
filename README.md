@@ -34,6 +34,53 @@ The project splits the workload cleanly between a stunning, lightning-fast **Str
 | PPT MCP Server       | FastMCP + python-pptx       | Creates and assembles PowerPoint slides with enforced Midnight Executive theme |
 | FS MCP Server        | FastMCP                     | Provides safe filesystem read/list access for verification |
 
+┌─────────────────────────────────────────────────────┐
+│                Streamlit Frontend                   │
+│                   (port 8501)                       │
+│                                                     │
+│  Chat Interface → Generate Button → Editor Tab      │
+│  Live Slide Preview Cards → Theme Toggle            │
+│  PDF Export (fpdf2) → Download PPTX Button          │
+└──────────────────────┬──────────────────────────────┘
+                       │ HTTP (httpx)
+                       │ POST /generate
+                       │ POST /update
+                       │ GET /download
+                       │ GET /health
+                       ▼
+┌─────────────────────────────────────────────────────┐
+│               FastAPI Backend                       │
+│                 server.py (port 8000)               │
+│                                                     │
+│  • /generate     → Runs full 3-phase agent pipeline │
+│  • /update       → Re-renders PPTX from edited plan │
+│  • /download     → Streams output.pptx              │
+│  • /health       → API status check                 │
+│                                                     │
+│  Manages MCP ClientSessions (asynccontextmanager)   │
+└──────────────────────┬──────────────────────────────┘
+                       │ stdio (MCP Protocol)
+                       ▼
+┌──────────────────────┬──────────────────────────────┐
+│   ppt_mcp_server.py  │  filesystem_mcp_server.py    │
+│     (MCP Server 1)   │       (MCP Server 2)         │
+│                      │                              │
+│  • create_presentation │  • read_file               │
+│  • add_slide         │  • list_dir                  │
+│  • save_presentation │                              │
+│                      │                              │
+│  Uses python-pptx to │  Safe filesystem access      │
+│  build Midnight      │  for verification            │
+│  Executive theme     │                              │
+└──────────────────────┴──────────────────────────────┘
+
+                  ▲
+                  │
+        LLM Calls via OpenRouter (gpt-4o-mini)
+                  │
+             agent_ppt.py
+       (3-Phase Pipeline: PLAN → EXEC → SAVE)
+
 ## Agent Pipeline
 
 The AI agent follows a strict 3-phase process:
