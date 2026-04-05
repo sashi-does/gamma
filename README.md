@@ -1,8 +1,14 @@
 # SlideMind – AI Presentation Builder ◈
 
-SlideMind is a modern, full-stack AI-powered presentation generator. It allows you to rapidly generate completely structured slide decks by simply providing a text prompt. Start with a topic, generate full slides with AI, preview them as cards, edit if needed, and download instantly as a beautiful native PowerPoint (`.pptx`) file.
+SlideMind is a modern, full-stack AI-powered presentation generator. It allows you to rapidly generate completely structured slide decks by simply providing a text prompt. 
+
+Start with a topic, generate full slides with AI, preview them as cards, edit if needed, and download instantly as a beautiful native PowerPoint (`.pptx`) file.
+
+<br>
 
 ---
+
+<br>
 
 ## Demo Video
 
@@ -11,6 +17,12 @@ Watch SlideMind in action:
 [![Watch Demo](https://img.youtube.com/vi/QqBGYNpWWhI/0.jpg)](https://youtu.be/QqBGYNpWWhI)
 
 The project splits the workload cleanly between a stunning, lightning-fast **Streamlit** frontend and a robust **FastAPI + MCP** (Model Context Protocol) backend capable of assembling raw PowerPoint files procedurally.
+
+<br>
+
+---
+
+<br>
 
 ## Technical Stack
 
@@ -25,12 +37,15 @@ The project splits the workload cleanly between a stunning, lightning-fast **Str
 - **Python-PPTX**: Used inside the MCP server to programmatically create slides, text boxes, bullet lists, and apply the 'Midnight Executive' dark theme.
 - **OpenRouter**: Powers the intelligent planning and content generation phase using gpt-4o-mini.
 
+<br>
+
 ---
+
+<br>
 
 ## System Architecture
 
-```
-ascii
+```ascii
 ┌─────────────────────────────────────────────────────┐
 │                Streamlit Frontend                   │
 │                   (port 8501)                       │
@@ -82,27 +97,41 @@ ascii
        (3-Phase Pipeline: PLAN → EXEC → SAVE)
 ```
 
-| Layer                | Technology                  | Responsibilities |
-|----------------------|-----------------------------|------------------|
-| Frontend (UI)        | Streamlit                   | Chat interface, session state management, live slide preview cards, interactive editor, theme toggle, PDF export |
-| API Gateway          | FastAPI                     | REST endpoints (/generate, /update, /download, /health), request validation, CORS, MCP session management, file streaming |
-| AI Agent Core        | agent_ppt.py                | 3-phase pipeline: Plan (LLM), Execute (MCP tools), Save |
-| LLM Provider         | OpenRouter                  | Routes calls to gpt-4o-mini for slide structure planning and bullet point generation |
-| PPT MCP Server       | FastMCP + python-pptx       | Creates and assembles PowerPoint slides with enforced Midnight Executive theme |
-| FS MCP Server        | FastMCP                     | Provides safe filesystem read/list access for verification |
+<br>
 
+| Layer | Technology | Responsibilities |
+|---|---|---|
+| **Frontend (UI)** | Streamlit | Chat interface, session state management, live slide preview cards, interactive editor, theme toggle, PDF export |
+| **API Gateway** | FastAPI | REST endpoints (`/generate`, `/update`, `/download`, `/health`), request validation, CORS, MCP session management, file streaming |
+| **AI Agent Core** | agent_ppt.py | 3-phase pipeline: Plan (LLM), Execute (MCP tools), Save |
+| **LLM Provider** | OpenRouter | Routes calls to gpt-4o-mini for slide structure planning and bullet point generation |
+| **PPT MCP Server** | FastMCP + python-pptx | Creates and assembles PowerPoint slides with enforced Midnight Executive theme |
+| **FS MCP Server** | FastMCP | Provides safe filesystem read/list access for verification |
+
+<br>
 
 ---
+
+<br>
 
 ## Agent Pipeline
 
 The AI agent follows a strict 3-phase process:
 
-1. **Phase 1 – PLAN**: Sends the user prompt to OpenRouter (gpt-4o-mini) and receives a structured JSON slide plan containing presentation title and list of slides with bullet points.
-2. **Phase 2 – EXEC**: Initializes the presentation and calls the PPT MCP server to add each slide. If a slide has fewer than 3 bullet points, an additional LLM call expands the content.
-3. **Phase 3 – SAVE**: Calls the save tool to write the final `output.pptx` file to disk.
+1. **Phase 1 – PLAN**  
+Sends the user prompt to OpenRouter (gpt-4o-mini) and receives a structured JSON slide plan containing presentation title and list of slides with bullet points.
+
+2. **Phase 2 – EXEC**  
+Initializes the presentation and calls the PPT MCP server to add each slide. If a slide has fewer than 3 bullet points, an additional LLM call expands the content.
+
+3. **Phase 3 – SAVE**  
+Calls the save tool to write the final `output.pptx` file to disk.
+
+<br>
 
 ---
+
+<br>
 
 ## Local Development & Setup
 
@@ -127,26 +156,39 @@ OPENROUTER_API_KEY="sk-or-v1-..."
 ```bash
 uvicorn server:app --reload
 ```
-This starts the FastAPI server on http://127.0.0.1:8000
+*This starts the FastAPI server on `http://127.0.0.1:8000`*
 
 ### 4. Run the Frontend
 Open a new terminal and run:
 ```bash
 streamlit run app.py
 ```
-The application will open automatically in your browser.
+*The application will open automatically in your browser.*
 
-**Note**: The sidebar will show a green status indicator when the backend is connected.
+> **Note**: The sidebar will show a green status indicator when the backend is connected.
+
+<br>
+
+---
+
+<br>
 
 ## Key Features
-- Conversational Builder – Describe your topic and get a complete slide deck
-- Configurable number of slides (3 to 10)
-- Live slide preview cards rendered directly in the UI
-- Interactive Editor tab to modify titles and bullet points
-- One-click download of native `.pptx` file with Midnight Executive theme
-- Instant PDF export generated in the frontend
-- Clean dark glassmorphic UI with theme toggle
-- Secure sandboxed architecture using MCP tools
+
+- **Conversational Builder** – Describe your topic and get a complete slide deck.
+- **Configurable Dimensions** – Choose the number of slides (3 to 10).
+- **Live Slide Preview Cards** – Rendered directly in the UI.
+- **Interactive Editor Tab** – Modify titles and bullet points dynamically.
+- **One-click Download** – Get a native `.pptx` file with the Midnight Executive theme.
+- **Instant PDF Export** – Generated in the frontend on the fly.
+- **Clean Dark Glassmorphic UI** – Complete with a theme toggle.
+- **Secure Architecture** – Features a sandboxed environment using MCP tools.
+
+<br>
+
+---
+
+<br>
 
 ## Repository Structure (Key Files)
 
@@ -157,10 +199,17 @@ The application will open automatically in your browser.
 - `servers/filesystem_mcp_server.py` – Filesystem tool server
 - `requirements.txt` – Project dependencies
 
+<br>
+
+---
+
+<br>
+
 ## Future Improvements
+
 - Theme customization engine
 - Pre-built slide template marketplace
 - Real-time collaboration support
 - Voice-to-presentation input
 - Automatic image generation per slide
-- Direct export to Google Slides & compatible to canva
+- Direct export to Google Slides & compatible with Canva
