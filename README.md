@@ -25,16 +25,8 @@ The project splits the workload cleanly between a stunning, lightning-fast **Str
 
 ## System Architecture
 
-| Layer                | Technology                  | Responsibilities |
-|----------------------|-----------------------------|------------------|
-| Frontend (UI)        | Streamlit                   | Chat interface, session state management, live slide preview cards, interactive editor, theme toggle, PDF export |
-| API Gateway          | FastAPI                     | REST endpoints (/generate, /update, /download, /health), request validation, CORS, MCP session management, file streaming |
-| AI Agent Core        | agent_ppt.py                | 3-phase pipeline: Plan (LLM), Execute (MCP tools), Save |
-| LLM Provider         | OpenRouter                  | Routes calls to gpt-4o-mini for slide structure planning and bullet point generation |
-| PPT MCP Server       | FastMCP + python-pptx       | Creates and assembles PowerPoint slides with enforced Midnight Executive theme |
-| FS MCP Server        | FastMCP                     | Provides safe filesystem read/list access for verification |
-
-```ascii
+```
+ascii
 ┌─────────────────────────────────────────────────────┐
 │                Streamlit Frontend                   │
 │                   (port 8501)                       │
@@ -84,8 +76,18 @@ The project splits the workload cleanly between a stunning, lightning-fast **Str
                   │
              agent_ppt.py
        (3-Phase Pipeline: PLAN → EXEC → SAVE)
-
 ```
+
+| Layer                | Technology                  | Responsibilities |
+|----------------------|-----------------------------|------------------|
+| Frontend (UI)        | Streamlit                   | Chat interface, session state management, live slide preview cards, interactive editor, theme toggle, PDF export |
+| API Gateway          | FastAPI                     | REST endpoints (/generate, /update, /download, /health), request validation, CORS, MCP session management, file streaming |
+| AI Agent Core        | agent_ppt.py                | 3-phase pipeline: Plan (LLM), Execute (MCP tools), Save |
+| LLM Provider         | OpenRouter                  | Routes calls to gpt-4o-mini for slide structure planning and bullet point generation |
+| PPT MCP Server       | FastMCP + python-pptx       | Creates and assembles PowerPoint slides with enforced Midnight Executive theme |
+| FS MCP Server        | FastMCP                     | Provides safe filesystem read/list access for verification |
+
+
 ## Agent Pipeline
 
 The AI agent follows a strict 3-phase process:
